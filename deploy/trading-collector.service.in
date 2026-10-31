@@ -1,0 +1,61 @@
+# Rendered by deploy/install.sh — do not install this file directly.
+#
+# Every at-sign placeholder below is resolved from the layout you chose, because
+# two layouts this repository documented could not both be right: the collector
+# and the reconciler were written for /opt with a `trading` system user, the
+# health check for %h under a --user session, and docs/SETUP.md told you to
+# `sudo cp` all three into /etc/systemd/system, where %h is root's home.
+#
+# Credentials come from @ENVFILE@, which is outside the repository, 0600, and
+# created empty by the installer — it writes variable names and never a value.
+# `systemctl edit trading-collector` still works and takes precedence if you
+# prefer a drop-in.
+#
+# Restart=always with a real backoff. A collector that gives up after three
+# failures is a collector that is off when you need it. A collector that
+# restarts instantly against a rate-limited vendor gets the key banned. Ten
+# seconds, and StartLimitIntervalSec=0 so it never stops trying.
+
+[Unit]
+Description=Market data collector — many sources, never merged
+Documentation=file://@PREFIX@/docs/RUNBOOK.md
+After=network-online.target@AFTERDB@
+Wants=network-online.target
+OnFailure=@ONFAILURE@
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+@USERLINES@WorkingDirectory=@PREFIX@
+EnvironmentFile=@ENVFILE@
+
+# Fail fast and loudly if the config or the credentials are wrong, before any
+# network call and before the unit claims to be running.
+ExecStartPre=@PYTHON@ scripts/run_collector.py --config @CONFIG@ --check
+ExecStart=@PYTHON@ scripts/run_collector.py --config @CONFIG@
+
+# SIGTERM is what the collector's handler expects: it stops the captures,
+# flushes every sink and prints what each one did. Give it time to finish
+# rather than killing it mid-flush.
+KillSignal=SIGTERM
+TimeoutStopSec=60
+
+Restart=always
+RestartSec=10
+
+# Unbuffered, so journalctl shows the last line before a crash rather than
+# whatever happened to be flushed.
+Environment=PYTHONUNBUFFERED=1
+
+# It reads market data and writes rows. It needs nothing else.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+@PROTECTHOME@ReadWritePaths=@PREFIX@/data
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=@WANTEDBY@

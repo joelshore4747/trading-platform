@@ -1,0 +1,31 @@
+id = "E-015"
+name = "CR-003: plateau-aware parameter stability against the current gate"
+hypothesis = "On a broad genuine edge the walk-forward argmax wanders between adjacent near-equal cells; counting only NON-adjacent moves as instability recovers ADR 0005's false negatives without admitting more noise. DISPROVED if any of: (1) at persistence 0 the discovery rate under plateau-aware stability exceeds the current null rate's 95% upper bound; (2) at persistence 0.90/0.95 no seed that failed on parameter_stability alone is recovered; (3) in those failing seeds the argmax moves are not between adjacent cells."
+motivation = "harness/CREATIVE_RESEARCH.md CR-003; ADR 0005's open item: neighbour_ratio and parameter_stability read the same plateau in opposite directions."
+dataset = "synthetic: 12 symbols, 900 daily instants, shared factor plus per-symbol AR(1) latent drift with persistence in {0.0, 0.9, 0.95}; generator committed in scripts/measure_plateau.py (ADR 0005's was not)"
+dataset_version = "seeded, in-script"
+strategy = "CrossSectionalMomentum (probe, untuned)"
+strategy_version = "9-cell grid lookback x rebalance_every"
+commit = "7a47200"
+date_range = "synthetic"
+method = "scripts/measure_plateau.py: per row and seed, walk_forward train 300 / test 100 / warmup 120, default CostModel; collect verdicts, parameter_stability, offline plateau_stability (share of fold transitions same-or-adjacent via _is_adjacent); discovery = no verdicts, under the current gate and with the stability objection replaced by the plateau-aware one"
+result = """SURVIVES stage 1 on all three arms (scripts/measure_plateau.py, 10 seeds x persistence {0.0, 0.5, 0.7, 0.9, 0.95} - two rows more than registered, added before running to bracket where stability binds; 92 s). (1) Null arm: at p=0.0 and p=0.5 the current gate and the plateau-aware gate both discover 0/10 - no more noise admitted. (2) Detection arm: at p=0.9 (IC 0.11-0.25) and p=0.95 (IC 0.27-0.42) six seeds failed on parameter_stability ALONE; plateau-aware stability recovers 5 of them (0.9: 2 of 3; 0.95: 3 of 3), lifting discoveries from 7/10 to 9/10 and 7/10 to 10/10. (3) Mechanism: in every recovered seed the argmax moves were one-step (adjacency of moves 0.5-1.0, plateau stability >= 0.6); the one NOT recovered (p=0.9 seed 6) jumped across the grid (plateau 0.40, adjacency 0.00) and the current gate was right to refuse it. Caveat that matters: the recoveries are at IC 0.11-0.42, far above real cross-sectional momentum (0.02-0.05); at p=0.7 (IC 0.00-0.09) there was nothing to recover - one discovery under either gate."""
+confidence = "medium"
+limitations = "synthetic; the persistence generator is a reconstruction, not ADR 0005's; small seed counts locate behaviour, not rates; verdicts() is not edited by this experiment"
+status = "PROMISING"
+next_step = "ADR 0009 PROPOSED (not accepted): plateau-aware stability to ACCOMPANY the current gate as a second reading, never replace it; verdicts() unchanged until a human decides. Re-run on real data when a strategy reaches the stability objection."
+created = "2026-09-03"
+trial_count = 1
+
+[parameters]
+seeds = "5"
+persistence = "0.0 0.9 0.95"
+grid = "9"
+
+[metrics]
+null_discoveries_current = "0/10 at p=0.0, 0/10 at p=0.5"
+null_discoveries_plateau = "0/10 at p=0.0, 0/10 at p=0.5"
+recovered = "5/6"
+discoveries_p090 = "7/10 -> 9/10"
+discoveries_p095 = "7/10 -> 10/10"
+runtime_s = "92"

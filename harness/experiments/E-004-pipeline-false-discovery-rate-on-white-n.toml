@@ -1,0 +1,27 @@
+id = "E-004"
+name = "Pipeline false-discovery rate on white noise"
+hypothesis = "The walk-forward pipeline passes pure noise at a bounded rate; disproved if the rate exceeds 5% at any sample size used for decisions"
+motivation = "ADR 0003: how often does the harness lie"
+dataset = "Regime.NULL + Gaussian noise"
+dataset_version = "synthetic"
+strategy = "none (null harness)"
+strategy_version = "-"
+commit = "UNKNOWN"
+date_range = "synthetic"
+method = "100 trials per row"
+result = "1% at 4,800 OOS bars; 7–8% at fewer than 1,000 OOS bars"
+confidence = "unknown"
+limitations = "synthetic noise only"
+status = "COMPLETED"
+next_step = "require >= 1,000 OOS bars before any claim (adopted)"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+trials_per_row = "100"
+
+[metrics]
+fdr_4800 = "1%"
+fdr_lt_1000 = "7-8%"

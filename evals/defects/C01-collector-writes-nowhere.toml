@@ -1,0 +1,27 @@
+id = "C01"
+title = "The collector's shipped configuration names a market the store rejects"
+category = "data-integrity"
+severity = "critical"
+provenance = "found by adversarial-reviewer attacking the W2 collector at cec3a29, 2026-09-04; the collector ran and wrote zero rows"
+expected_agent = "adversarial-reviewer"
+tell = """
+The reviewer must say that `market` in the collector's configuration is the
+STORE's market key — one of spot, um, cm, equity, etf, option — while `stocks`
+is Alpaca's own path segment, and that shipping `market = "stocks"` made every
+`write_bars` raise `unknown market`. The consequence is the whole deliverable
+failing silently in the one way that is hardest to notice: `--check` passes,
+both sources report healthy, both ingest runs close with `status = 'ok'` and
+`rows_written = 0`, the exit code only turns 1 at shutdown, and the reconciler
+prints NOTHING COMPARED forever. The library tests all passed because they used
+a valid market; nothing tested `build()`, which is the only thing systemd runs.
+"""
+expected_killers = ["tests/test_run_collector.py"]
+
+[[mutation]]
+file = "config/collector.example.toml"
+find = '''
+market = "equity"
+'''
+replace = '''
+market = "stocks"
+'''

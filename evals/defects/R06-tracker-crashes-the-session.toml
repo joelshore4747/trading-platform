@@ -1,0 +1,29 @@
+id = "R06"
+title = "The account tracker crashes the session it observes, on ordinary marks"
+category = "risk"
+severity = "critical"
+provenance = "found by adversarial-reviewer attacking W3 at e93b7e6, 2026-09-04; 52 of 2,000 ordinary (quantity, price) combinations"
+expected_agent = "adversarial-reviewer"
+tell = """
+The reviewer must say that `mark_from_portfolio` recomputes the §29 identity in
+cent-rounded space from two independently rounded operands — `marked_equity` is
+`quantize(cash + positions_value)` while the mark rounded `positions_value` on
+its own, and `quantize(a + b)` is not `quantize(a) + quantize(b)` on a half-cent
+tie. The consequence is that an observer takes down the thing it observes: a
+paper session with a tracker attached dies on about 2.6% of fractional-quantity
+marks, with an exception that blames the ledger for a rounding artefact, while
+the identical session with `tracker=None` completes. That is a monitoring
+component creating the risk it exists to measure. The fix derives
+`positions_value = equity - cash` so the identity holds by construction, and
+puts the mark's construction inside the boundary that must not raise.
+"""
+expected_killers = ["tests/test_account_store.py"]
+
+[[mutation]]
+file = "src/trading_platform/live/tracker.py"
+find = '''
+    positions_value = equity - cash
+'''
+replace = '''
+    positions_value = quantize_cash(portfolio.marked_positions_value)
+'''

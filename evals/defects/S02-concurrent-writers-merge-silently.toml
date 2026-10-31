@@ -1,0 +1,27 @@
+id = "S02"
+title = "Two writers contradicting one instant merge silently instead of raising"
+category = "data-integrity"
+severity = "critical"
+provenance = "found by adversarial-reviewer attacking the W1 store at c4c81af, 2026-09-03; measured 299 silent losses in 300 races"
+expected_agent = "adversarial-reviewer"
+tell = """
+The reviewer must say that `write_bars` checks for a contradiction BEFORE its
+insert and not after it, so under concurrency the check is worthless: writer B
+reads (nothing stored), writer A commits a different close for the same
+instant, B's `ON CONFLICT DO NOTHING` finds the row and does nothing, and B is
+told `0` — the same answer an ordinary replay gives. The consequence is that
+the store's one stated invariant (a source contradicting itself raises and
+writes nothing) fails exactly under the many-concurrent-writers workload that
+ADR 0010 gives as the reason the store exists, and the disagreement — the whole
+point of running several feeds — is discarded with no trace.
+"""
+expected_killers = ["tests/test_store.py"]
+
+[[mutation]]
+file = "src/trading_platform/store/bars.py"
+find = '''
+        _refuse_clash(cursor, source, "after")
+'''
+replace = '''
+        pass
+'''

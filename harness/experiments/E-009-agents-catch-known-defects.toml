@@ -1,0 +1,26 @@
+id = "E-009"
+name = "Agents catch known defects"
+hypothesis = "The auditor agents identify each corpus defect and stay clean on controls; disproved by a miss or a false positive"
+motivation = "ADR 0006"
+dataset = "evals/ corpus, 8 mutants"
+dataset_version = "corpus 2026-08-27"
+strategy = "-"
+strategy_version = "-"
+commit = "UNKNOWN"
+date_range = "2026-08-27"
+method = "headless claude -p per mutant, judge with control"
+result = "8/8 identified after the confound fix; both flagged controls were real defects (A01, 9b)"
+confidence = "unknown"
+limitations = "two runs; small corpus; costs money"
+status = "COMPLETED"
+next_step = "re-run when a brief changes (agent-evaluation skill)"
+created = "2026-09-01"
+trial_count = 2
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+mutants = "8"
+
+[metrics]
+identified = "8/8"

@@ -1,0 +1,26 @@
+id = "G04"
+title = "A pipe or a newline in one cell truncates the generated debt table"
+category = "guard"
+severity = "medium"
+provenance = "found by guard-auditor auditing render_debt at 9caa9d3, 2026-09-04 (T-0abc5596)"
+expected_agent = "guard-auditor"
+tell = """
+The auditor must say that `render_debt` escapes `|` in the title and the
+resolution but not in `where`, and that nothing refuses a newline anywhere — so
+one badly-typed `--path` adds a column and one pasted newline ENDS the markdown
+table, hiding every ticket below it. The second half is the part that matters:
+`ticket.py debt --check` compares generated text against generated text, so a
+truncated table reports as up to date. It must also note that the existing
+escaping is itself unguarded, because no ticket in the real log contains a pipe
+and no unit test constructs one.
+"""
+expected_killers = ["tests/test_tickets.py"]
+
+[[mutation]]
+file = "scripts/ticket.py"
+find = '''
+    return " ".join(value.replace("|", "\\|").split())
+'''
+replace = '''
+    return value
+'''

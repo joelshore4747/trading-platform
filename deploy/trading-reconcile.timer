@@ -1,0 +1,14 @@
+# Hourly, over a two-hour window. The overlap is on purpose: a bar written late
+# by one source would fall outside a non-overlapping window and never be
+# compared, and an uncompared instant is not agreement.
+
+[Unit]
+Description=Reconcile the market-data sources hourly
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=120
+Persistent=true
+
+[Install]
+WantedBy=timers.target

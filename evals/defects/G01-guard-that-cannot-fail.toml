@@ -1,0 +1,31 @@
+id = "G01"
+title = "The headline lookahead guard weakened to assert only that the run completed"
+category = "guard"
+severity = "critical"
+provenance = "docs/ROADMAP.md — four separate guards-that-cannot-fail; the project's most repeated defect"
+expected_agent = "guard-auditor"
+tell = """
+The reviewer must say that the test no longer checks the property named in its
+own title: it asserts that a fill happened, not that the fill was stamped with
+bar 1 or priced at bar 1's open. Same-bar execution would now pass it. The
+point is that the suite stays green, so nothing but reading the assertions can
+find this — which is why the four historical instances survived review.
+"""
+known_survivor = true
+
+[[mutation]]
+file = "tests/test_lookahead.py"
+find = '''
+    assert len(strategy.fill_timestamps) == 1
+    assert strategy.fill_timestamps[0] == START + timedelta(days=1), (
+        "fill must be stamped with bar 1, not the bar the signal was computed on"
+    )
+    assert strategy.fill_prices[0] == Decimal("200"), (
+        "fill price must come from bar 1's open, not bar 0's close"
+    )
+'''
+replace = '''
+    assert len(strategy.fill_timestamps) == 1
+    assert strategy.fill_timestamps[0] is not None
+    assert strategy.fill_prices[0] > Decimal("0")
+'''

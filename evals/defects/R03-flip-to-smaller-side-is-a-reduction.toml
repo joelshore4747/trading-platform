@@ -1,0 +1,31 @@
+id = "R03"
+title = "A flip to a smaller opposite position counted as exposure-reducing"
+category = "risk"
+severity = "critical"
+provenance = "docs/ROADMAP.md step 9b; found by risk-auditor on an unmutated tree during the first agent-eval run (2026-08-27); fixed 2026-09-02"
+expected_agent = "risk-auditor"
+tell = """
+The reviewer must identify that `|projected| < |current|` is satisfied by an
+order that crosses zero and lands on a smaller position of the opposite sign,
+so a single order can close the whole book and open the far side while being
+labelled risk-reducing. The consequence must be stated: such an order skips
+every size cap via the early return, and passes the halt check — a halted
+account long 100 accepted one sell of 130 (13,000 notional) with zero
+rejections. Merely restating that a larger flip is blocked is not the finding;
+the smaller-flip case is.
+"""
+expected_killers = ["tests/test_risk_composition.py", "tests/test_risk.py"]
+
+# Re-anchored at the 2026-09-07 branch merge: the guard moved into
+# `_reduces_exposure_between`, whose parameter is `current` rather than
+# `current_quantity`. The defect is unchanged.
+[[mutation]]
+file = "src/trading_platform/risk/limits.py"
+find = '''
+        if projected != 0 and (projected > 0) != (current > 0):
+            return False  # 9b: a flip through zero opens the other side
+        return abs(projected) < abs(current)
+'''
+replace = '''
+        return abs(projected) < abs(current)
+'''

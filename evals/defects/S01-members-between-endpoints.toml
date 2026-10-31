@@ -1,0 +1,25 @@
+id = "S01"
+title = "members_between unions the endpoints, dropping symbols alive only mid-window"
+category = "survivorship"
+severity = "critical"
+provenance = "commit bdf84d5; the survivorship bug found inside the anti-survivorship function"
+expected_agent = "lookahead-auditor"
+tell = """
+The reviewer must say that testing membership at the two window endpoints drops
+any symbol that listed after the start and delisted before the end — selecting
+for names alive at the window edges. It must name this as survivorship bias
+rather than an approximation of it, and note that the result gets BETTER, which
+is why nothing downstream would complain.
+"""
+expected_killers = ["tests/test_universe.py"]
+
+[[mutation]]
+file = "src/trading_platform/data/universe.py"
+find = '''
+                symbol for symbol, (lo, hi, _) in self._bounds.items() if lo <= end and hi >= start
+'''
+replace = '''
+                symbol
+                for symbol, (lo, hi, _) in self._bounds.items()
+                if (lo <= start <= hi) or (lo <= end <= hi)
+'''

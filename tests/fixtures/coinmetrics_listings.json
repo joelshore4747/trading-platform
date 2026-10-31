@@ -1,0 +1,161 @@
+{
+  "source": "Coin Metrics community data archive, CC BY-NC 4.0",
+  "url": "https://raw.githubusercontent.com/coinmetrics/data/master/csv/<asset>.csv",
+  "fetched": "2026-08-25",
+  "column": "PriceUSD",
+  "note": "first_priced is the first date the asset carried a USD reference price, which is the closest thing to a real listing date this source offers. last_priced is NOT a delisting: Coin Metrics keeps publishing a reference rate indefinitely, including for FTT and LUNA, so no asset in this file has ever stopped.",
+  "assets": {
+    "AAVE": {
+      "first_priced": "2020-10-10",
+      "last_priced": "2026-05-23"
+    },
+    "ADA": {
+      "first_priced": "2017-12-01",
+      "last_priced": "2026-05-23"
+    },
+    "ALGO": {
+      "first_priced": "2019-06-22",
+      "last_priced": "2026-05-23"
+    },
+    "BAL": {
+      "first_priced": "2020-06-25",
+      "last_priced": "2026-05-23"
+    },
+    "BAT": {
+      "first_priced": "2017-10-06",
+      "last_priced": "2026-05-23"
+    },
+    "BCH": {
+      "first_priced": "2017-08-01",
+      "last_priced": "2026-05-23"
+    },
+    "BSV": {
+      "first_priced": "2018-11-15",
+      "last_priced": "2026-05-23"
+    },
+    "BTC": {
+      "first_priced": "2010-07-18",
+      "last_priced": "2026-05-23"
+    },
+    "COMP": {
+      "first_priced": "2020-06-18",
+      "last_priced": "2026-05-23"
+    },
+    "CRV": {
+      "first_priced": "2020-08-15",
+      "last_priced": "2026-05-23"
+    },
+    "DASH": {
+      "first_priced": "2014-02-08",
+      "last_priced": "2026-05-23"
+    },
+    "DOGE": {
+      "first_priced": "2014-01-23",
+      "last_priced": "2026-05-23"
+    },
+    "DOT": {
+      "first_priced": "2020-08-20",
+      "last_priced": "2026-05-23"
+    },
+    "EOS": {
+      "first_priced": "2018-06-09",
+      "last_priced": "2026-05-23"
+    },
+    "ETC": {
+      "first_priced": "2016-07-25",
+      "last_priced": "2026-05-23"
+    },
+    "ETH": {
+      "first_priced": "2015-08-08",
+      "last_priced": "2026-05-23"
+    },
+    "FTT": {
+      "first_priced": "2019-08-20",
+      "last_priced": "2026-05-23"
+    },
+    "GNO": {
+      "first_priced": "2017-05-02",
+      "last_priced": "2026-05-23"
+    },
+    "ICP": {
+      "first_priced": "2021-05-11",
+      "last_priced": "2026-05-23"
+    },
+    "KNC": {
+      "first_priced": "2017-09-27",
+      "last_priced": "2026-05-23"
+    },
+    "LINK": {
+      "first_priced": "2017-09-29",
+      "last_priced": "2026-05-23"
+    },
+    "LTC": {
+      "first_priced": "2013-04-01",
+      "last_priced": "2026-05-23"
+    },
+    "MANA": {
+      "first_priced": "2017-08-25",
+      "last_priced": "2026-05-23"
+    },
+    "MKR": {
+      "first_priced": "2017-12-26",
+      "last_priced": "2026-03-25"
+    },
+    "NEO": {
+      "first_priced": "2017-07-15",
+      "last_priced": "2026-05-23"
+    },
+    "OMG": {
+      "first_priced": "2017-07-15",
+      "last_priced": "2026-05-23"
+    },
+    "REN": {
+      "first_priced": "2018-12-07",
+      "last_priced": "2026-05-23"
+    },
+    "REP": {
+      "first_priced": "2016-10-04",
+      "last_priced": "2026-05-23"
+    },
+    "SNX": {
+      "first_priced": "2020-04-09",
+      "last_priced": "2026-05-23"
+    },
+    "SUSHI": {
+      "first_priced": "2020-09-01",
+      "last_priced": "2026-05-23"
+    },
+    "TRX": {
+      "first_priced": "2018-06-25",
+      "last_priced": "2026-05-23"
+    },
+    "UNI": {
+      "first_priced": "2020-09-18",
+      "last_priced": "2026-05-23"
+    },
+    "XMR": {
+      "first_priced": "2014-05-20",
+      "last_priced": "2026-05-23"
+    },
+    "XRP": {
+      "first_priced": "2014-08-15",
+      "last_priced": "2026-05-23"
+    },
+    "XTZ": {
+      "first_priced": "2018-06-30",
+      "last_priced": "2026-05-23"
+    },
+    "YFI": {
+      "first_priced": "2020-07-25",
+      "last_priced": "2026-05-23"
+    },
+    "ZEC": {
+      "first_priced": "2016-10-29",
+      "last_priced": "2026-05-23"
+    },
+    "ZRX": {
+      "first_priced": "2017-08-11",
+      "last_priced": "2026-05-23"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+id = "E-012"
+name = "Gauntlet finds what single audits miss"
+hypothesis = "Running every auditor and attacking the synthesis finds defects a single audit missed; disproved if it confirms nothing new"
+motivation = "roadmap step 35"
+dataset = "E-011's result"
+dataset_version = "-"
+strategy = "-"
+strategy_version = "-"
+commit = "UNKNOWN"
+date_range = "2026-09-01"
+method = "41 agents, adversarial verification"
+result = "27 findings confirmed / 8 refuted; found 35a, which retracted every perpetual figure"
+confidence = "unknown"
+limitations = "pre-mortem phase never ran (session limit)"
+status = "COMPLETED"
+next_step = "resume wf_4993d909-339"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+agents = "41"
+
+[metrics]
+confirmed = "27"
+refuted = "8"

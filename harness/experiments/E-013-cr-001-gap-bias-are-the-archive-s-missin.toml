@@ -1,0 +1,32 @@
+id = "E-013"
+name = "CR-001 gap bias: are the archive's missing minutes activity-conditioned"
+hypothesis = "The 54% of missing minutes in the Binance perpetual archive are missing because the collector dropped under load, so bars at gap edges are more active than hour-matched interior bars and low-coverage days have higher realised variance. DISPROVED if (a) edge-bar median |1m log return| and median volume both sit inside the 2.5-97.5 percentile band of 1,000 hour-matched interior draws for at least 35 of 39 symbols, and (b) the cross-symbol median Spearman rho between daily coverage and daily realised variance sits inside the band of 1,000 day-label shuffles."
+motivation = "harness/CREATIVE_RESEARCH.md CR-001: if missingness is activity-conditioned (MNAR), every volatility, fill and cost figure on this archive is biased low, including E-011's."
+dataset = "Binance USD-M perpetual archive historical.zip, 39 screened symbols, 1m, 2026-07-20 to 2026-08-21, 46% coverage"
+dataset_version = "historical.zip sha256 65f25750c402; cache import 2026-09"
+strategy = "none (data-quality study)"
+strategy_version = "-"
+commit = "48f3b35"
+date_range = "2026-07-20 to 2026-08-21"
+method = "scripts/measure_gap_bias.py: per symbol, gap-edge bars vs 1,000 hour-matched interior draws (median |log return|, median volume); per symbol daily coverage vs realised variance Spearman with 1,000 day-label shuffles; share of gap minutes common to all symbols"
+result = """DISPROVED on both pre-registered statistics (scripts/measure_gap_bias.py, draws=1000, seed=0, 39 symbols, 824,304 bars, 10 s). (a) Edge-bar medians sat inside the 2.5-97.5 hour-matched null band for 38 of 39 symbols on BOTH |log return| and volume (threshold 35); 0 symbols above the 97.5th percentile on either. The one outside was WLFIUSDT at the 0.2nd percentile on |r| - LESS active at gap edges, the wrong direction for the mechanism. (b) Median Spearman(coverage, realised variance) across symbols -0.026, inside the shuffle band [-0.084, +0.086], percentile 29.1. (c) 25,165 of the 25,469 missing minutes in the union are missing from ALL 39 symbols (98.8%): one collector, one outage pattern. Missingness is MCAR conditional on hour of day; the only correction owed is reweighting unconditional intraday figures by 1/coverage(hour)."""
+confidence = "high"
+limitations = "the test is itself weighted to 07-10 UTC; first-bar-after-gap activity is measured as its forward within-segment return, decided before running; one venue, one month"
+status = "REJECTED"
+next_step = "RETIRED as a mechanism. DATA_MAP notes the 1/coverage(hour) reweighting and that the per-hour coverage measured on BTC generalises (gaps are 98.8% shared). CR-002 lead/lag may proceed without a missingness caveat beyond the hour weighting."
+created = "2026-09-03"
+trial_count = 1
+
+[parameters]
+draws = "1000"
+seed = "0"
+edge_metric = "abs log return + volume"
+
+[metrics]
+inside_both_bands = "38/39"
+edge_r_above_97_5 = "0"
+edge_volume_above_97_5 = "0"
+day_rho_median = "-0.026"
+day_rho_null_band = "[-0.084, +0.086]"
+common_gap_share = "98.8%"
+runtime_s = "10"

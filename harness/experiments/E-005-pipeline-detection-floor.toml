@@ -1,0 +1,26 @@
+id = "E-005"
+name = "Pipeline detection floor"
+hypothesis = "The pipeline detects a planted edge of realistic size; disproved if only unrealistic edges are found"
+motivation = "ADR 0003: what the harness can see"
+dataset = "synthetic planted edges"
+dataset_version = "synthetic"
+strategy = "oracle-ish sweep"
+strategy_version = "-"
+commit = "UNKNOWN"
+date_range = "synthetic"
+method = "sweep over planted Sharpe"
+result = "Sharpe 4.93 found 5% of the time; 18.7 always — above the generator ceiling, so the floor is above realistic edges"
+confidence = "unknown"
+limitations = "synthetic; detection depends on probe (ADR 0005)"
+status = "COMPLETED"
+next_step = "better probe (E-008)"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+
+[metrics]
+detect_at_4.93 = "5%"
+detect_at_18.7 = "100%"

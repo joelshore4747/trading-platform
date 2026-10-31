@@ -1,0 +1,28 @@
+id = "E-003"
+name = "SMACrossover, calibrated generator, 10 bp"
+hypothesis = "With a calibrated generator and 10 bp costs SMACrossover retains OOS efficiency; disproved by efficiency < 0.5 or stability < 50%"
+motivation = "re-run E-001 honestly"
+dataset = "synthetic, calibrated generator"
+dataset_version = "UNKNOWN"
+strategy = "SMACrossover"
+strategy_version = "calibrated"
+commit = "UNKNOWN"
+date_range = "2026-08 synthetic"
+method = "rolling walk-forward"
+result = "efficiency 0.27, parameter stability 0%, chop control 0.18"
+confidence = "unknown"
+limitations = "synthetic data; single cost preset"
+status = "REJECTED"
+next_step = "none — strategy is the hello-world control"
+created = "2026-09-01"
+trial_count = 2
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+cost_bp = "10"
+
+[metrics]
+efficiency = "0.27"
+stability = "0%"
+chop_control = "0.18"

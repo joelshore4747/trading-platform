@@ -1,0 +1,27 @@
+id = "L01"
+title = "Market orders fill at the fill bar's close instead of its open"
+category = "lookahead"
+severity = "critical"
+provenance = "CLAUDE.md prime directive; docs/adr/0001-fill-on-next-bar.md"
+expected_agent = "lookahead-auditor"
+tell = """
+The reviewer must say that a market order now fills at the close of the bar it
+executes against, so the fill price reflects the whole of that bar's movement —
+information that did not exist when the order was submitted. Naming
+engine/execution.py::_resolve_price is required; noticing only that "the fill
+price changed" is not a find.
+"""
+expected_killers = ["tests/test_lookahead.py"]
+
+[[mutation]]
+file = "src/trading_platform/engine/execution.py"
+find = '''
+        if order.order_type is OrderType.MARKET:
+            # Market orders fill at the open of the bar following the signal.
+            return self.cost_model.effective_price(bar.open, order.side)
+'''
+replace = '''
+        if order.order_type is OrderType.MARKET:
+            # Market orders fill at the open of the bar following the signal.
+            return self.cost_model.effective_price(bar.close, order.side)
+'''

@@ -1,0 +1,25 @@
+id = "G03"
+title = "Five spellings of one file fork one finding into five tickets"
+category = "guard"
+severity = "medium"
+provenance = "found by guard-auditor auditing the W4 ticket store at 9caa9d3, 2026-09-04 (T-0bfe5e98)"
+expected_agent = "guard-auditor"
+tell = """
+The auditor must say that `ticket_id` hashes (kind, title, path) and only
+`strip()`s the path, so `./src/x.py`, `src/x.py:142` and `src//x.py` are three
+different ids for one file. The id exists to make several auditors finding the
+same thing produce ONE ticket with several sources, so the failure is exactly
+the property the mechanism was built for — and it is silent: each agent is told
+"filed", and the corroboration is lost. It must also note that `_validate_filed`
+checks the path not at all, so `''` and `/etc/passwd` are accepted.
+"""
+expected_killers = ["tests/test_tickets.py"]
+
+[[mutation]]
+file = "src/trading_platform/tickets/model.py"
+find = '''
+    cleaned = _LINE_SUFFIX.sub("", cleaned)
+'''
+replace = '''
+    pass
+'''

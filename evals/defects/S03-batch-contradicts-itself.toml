@@ -1,0 +1,25 @@
+id = "S03"
+title = "A batch that contradicts itself keeps whichever row arrived first"
+category = "data-integrity"
+severity = "high"
+provenance = "found by adversarial-reviewer attacking the W1 store at c4c81af, 2026-09-03"
+expected_agent = "adversarial-reviewer"
+tell = """
+The reviewer must say that the clash query joins the staging table to `bars` and
+never to itself, so two rows in ONE batch for the same instant with different
+prices are not a contradiction to it. `ON CONFLICT DO NOTHING` then keeps
+whichever row COPY delivered first and drops the other with no exception and a
+plausible count. The consequence is that the surviving price depends on row
+order, and a feed emitting a corrected bar in the same poll window — which
+exchanges do — has either the correction or the original silently discarded.
+"""
+expected_killers = ["tests/test_store.py"]
+
+[[mutation]]
+file = "src/trading_platform/store/bars.py"
+find = '''
+        _refuse_internal_contradiction(cursor, source)
+'''
+replace = '''
+        pass
+'''

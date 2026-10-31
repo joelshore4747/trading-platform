@@ -1,0 +1,52 @@
+id = "E-017"
+name = "The ML pipeline on pure noise: does it leak?"
+hypothesis = "The feature/label/split pipeline in ml/ finds no edge in data that has none. DISPROVED if, on a driftless random walk, the mean accuracy over the majority-class floor is large relative to its spread across trials, or the share of folds with a positive edge is far from 50%."
+motivation = "Workstream 9. The user chose 'build the pipeline, gate the model'. The pipeline is the hard part and a leak in it is invisible on real data, because on real data a positive result is what you were hoping for. This measurement has to come before anything else."
+dataset = "synthetic: driftless geometric random walk, sigma 0.001 per bar, seeded; generator committed in scripts/measure_ml_null.py. NO DRIFT deliberately — a drifting series has a real edge (buy and hold) and a pipeline that found it would be right, which tells us nothing."
+dataset_version = "seeded, in-script"
+strategy = "ml.pipeline.run_pipeline with the SingleFeatureThreshold baseline"
+strategy_version = "6 features, horizon 10, train 500 / test 200"
+commit = "4b99e56"
+date_range = "synthetic"
+method = "scripts/measure_ml_null.py: N trials of 4,000 noise bars each; per trial, features -> open-to-open labels -> purged and embargoed rolling splits -> fit -> accuracy minus the majority-class floor on the same test set. Report the mean edge, its spread across trials, and the share of folds positive."
+result = """SURVIVES. 30 trials, 510 folds:
+
+  mean edge over floor   -0.00070
+  spread across trials    0.02551
+  folds positive         245/510 (48.0%)
+
+A follow-up at 20 trials per arm across embargo in {0, 20, 50, 200} gave means of
++0.0075, +0.0066, +0.0017 and +0.0104, each against a per-trial spread of about
+0.029 — a standard error near 0.0065, so every arm is within about 1.6 standard
+errors of zero. The embargo does not move the result at this horizon, which is
+consistent with the purge already removing the overlap that matters.
+
+**And the detector was tested against a leak.** A seventh feature was added that
+reads the label's own forward window — the exact mistake the package exists to
+prevent — and the same run on the same noise went from an edge of +0.03 to +0.31.
+The harness notices. An earlier version of that check peeked only ONE bar ahead
+while the label measured ten; the two were barely related, the 'leak' moved the
+edge by 0.02, and the test nearly passed for the wrong reason. That is recorded
+because it is the more useful finding: a leak detector tested against a weak leak
+is a detector nobody has actually tested."""
+confidence = "medium"
+limitations = "Synthetic noise is not real data: it has no volatility clustering, no gaps, no microstructure and no fat tails, and a leak that only bites in the presence of those would not show here. 30 trials locates the behaviour rather than bounding the rate. Only the SingleFeatureThreshold baseline was measured; a model with more capacity would exploit a smaller leak, so this result does not transfer to one. The pipeline having no leak is necessary and nowhere near sufficient for any result it later produces."
+status = "VALIDATED"
+next_step = "The model stays gated (ml/baseline.load_model). The condition is written into the error and is a DATA condition: at least 2 years of bars from at least 20 instruments across at least 2 venues, plus this measurement clean at the horizon and embargo intended. Re-run this null measurement whenever a feature is added — a new feature is a new opportunity to leak, and the cost of re-running is a minute."
+created = "2026-09-04"
+trial_count = 1
+
+[parameters]
+trials = "30"
+bars = "4000"
+horizon = "10"
+train = "500"
+test = "200"
+embargo = "0 20 50 200"
+
+[metrics]
+mean_edge = "-0.00070"
+spread = "0.02551"
+folds_positive = "245/510"
+leak_arm_edge = "+0.31"
+clean_arm_edge = "+0.03"

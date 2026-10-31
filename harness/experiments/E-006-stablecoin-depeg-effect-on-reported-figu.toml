@@ -1,0 +1,27 @@
+id = "E-006"
+name = "Stablecoin depeg effect on reported figures"
+hypothesis = "Treating USDT as USD changes reported risk; disproved if all metrics are unchanged under a simulated depeg"
+motivation = "ADR 0002"
+dataset = "real BTCUSDT 1m + simulated depeg to 0.8789"
+dataset_version = "archive 2026-08"
+strategy = "buy-and-hold round trip"
+strategy_version = "-"
+commit = "UNKNOWN"
+date_range = "32 days real"
+method = "metrics comparison USDT vs USD"
+result = "total return unchanged (−23.75%); vol 20.07% → 54.61%; MDD 25.12% → 27.64%"
+confidence = "unknown"
+limitations = "daily rate series understates intraday depeg 4.4x"
+status = "COMPLETED"
+next_step = "refuse unknown rates (adopted in core/fx.py)"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+depeg = "0.8789"
+
+[metrics]
+vol_usdt = "20.07%"
+vol_usd = "54.61%"

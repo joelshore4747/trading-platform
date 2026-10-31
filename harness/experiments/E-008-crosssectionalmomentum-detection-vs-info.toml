@@ -1,0 +1,28 @@
+id = "E-008"
+name = "CrossSectionalMomentum detection vs information coefficient"
+hypothesis = "A cross-sectional probe detects an edge at IC ~0.05 where SMACrossover cannot; disproved if detection turns on only above realistic IC"
+motivation = "ADR 0005: the probe matters"
+dataset = "synthetic, 12 symbols, persistence sweep"
+dataset_version = "synthetic"
+strategy = "CrossSectionalMomentum"
+strategy_version = "v1"
+commit = "UNKNOWN"
+date_range = "synthetic"
+method = "walk-forward 9-cell, 5 seeds per row"
+result = "detection turns on at IC ≈ 0.05; real CS momentum sits at 0.02–0.05, so the probe is at the edge of usefulness"
+confidence = "unknown"
+limitations = "synthetic; as a strategy it is unvalidated"
+status = "PROMISING"
+next_step = "run on the 39-symbol real perp panel once funding data exists"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+symbols = "12"
+cells = "9"
+seeds = "5"
+
+[metrics]
+detection_ic = "0.05"

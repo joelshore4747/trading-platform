@@ -1,0 +1,53 @@
+id = "E-016"
+name = "ICT liquidity-sweep reversal on real BTCUSDT 1m"
+hypothesis = "Stop orders cluster just beyond visible swing highs and lows; a bar whose wick reaches through such a level and closes back inside has filled them, and the move reverses. The effect is claimed to be strongest inside the London and New York killzones. DISPROVED if any of: (1) no walk-forward fold is profitable out of sample; (2) the in-sample sweep itself finds no profitable cell, meaning there is nothing to degrade; (3) it fails to beat cost-free buy-and-hold in a majority of folds; (4) the killzone filter is the whole result, i.e. the winning cell always has use_killzones=True and the False arm is uniformly worse."
+motivation = "Workstream 6. The user asked for ICT methods. These concepts are widely taught and thinly evidenced, and mechanising them is exactly what this platform is for. The expected outcome is rejection."
+dataset = "data/cache/um/BTCUSDT/1m.parquet - the committed Binance perpetual archive, 46% coverage in 18 segments, 2026-07-20 to 2026-08-21"
+dataset_version = "historical.zip as imported by scripts/import_vendor.py"
+strategy = "ICTSweepReversal (strategy/examples/ict_sweep_reversal.py), composed from strategy/patterns/"
+strategy_version = "12-cell grid: strength x hold x use_killzones"
+commit = "c0ae495"
+date_range = "2026-07-20 to 2026-08-21"
+method = "examples/run_walk_forward_ict.py: rolling walk-forward, train 3000 / test 1000 / warmup 300, default CostModel (never ZERO_COST), fully collateralised perpetual at 1x, benchmark BTCUSDT, 525,600 periods per year. use_killzones is IN the grid so the time filter competes rather than being assumed."
+result = """REJECTED, and not narrowly. 18 folds, 622 out-of-sample fills, median 30 per fold.
+
+  Mean in-sample Sharpe      -23.83
+  Mean out-of-sample Sharpe  -31.37
+  Profitable folds             0/18
+  Grid profitable                0%  (mean across folds)
+  Beat cost-free buy-and-hold  2/18
+
+The decisive number is the in-sample one. The strategy loses on the data it was
+fitted on, and 0% of the average training grid is profitable, so there is no
+edge to degrade and efficiency is undefined. This is not "it did not generalise";
+it is "there was never anything there". The walk-forward harness raised four
+independent DO NOT TRUST objections of its own, including that the annualisation
+is not meaningful over folds this short - which is true, and does not rescue a
+result that is negative before annualising.
+
+On hypothesis (4): the killzone filter did NOT carry the result. The winning cell
+used use_killzones=False in 4 of 18 folds and True in 14, and both arms are
+uniformly negative. The filter is neither the edge nor the problem."""
+confidence = "high"
+limitations = "One instrument, 32 days, one regime. Carry is unmodelled - these are perpetuals and the archive ships no funding series, so a real result would be worse, not better. Coverage is 46% in 18 segments and a swing level either side of a multi-day hole is not a level anyone was looking at; the time filter is additionally exposed to the coverage bias (56% in hours 07-10 UTC against 25% in 18-23). None of these rescue the result: every one of them is a reason the true figure is lower."
+status = "REJECTED"
+next_step = "Do not trade it and do not tune it. Tuning a strategy with no in-sample edge is fitting noise by definition, and each tweak is another trial to deflate for. The primitives are kept - they are tested, reusable, and the lookahead walk in tests/test_patterns.py is worth having regardless - but this composition of them is finished. If ICT is revisited it needs a different mechanism, not different parameters, and a pre-registered hypothesis of its own."
+created = "2026-09-04"
+trial_count = 1
+
+[parameters]
+strength = "2 5 10"
+hold = "15 60"
+use_killzones = "true false"
+train_size = "3000"
+test_size = "1000"
+warmup = "300"
+
+[metrics]
+mean_in_sample_sharpe = "-23.83"
+mean_out_of_sample_sharpe = "-31.37"
+profitable_folds = "0/18"
+grid_profitable = "0%"
+beat_buy_and_hold = "2/18"
+out_of_sample_fills = "622"
+folds = "18"

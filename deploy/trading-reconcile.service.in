@@ -1,0 +1,27 @@
+# Rendered by deploy/install.sh — do not install this file directly.
+#
+# The reconciler, run on a timer rather than continuously: it is a comparison
+# over a window, not a stream. See trading-reconcile.timer.
+#
+# EnvironmentFile is the fix for the defect this unit shipped with. It carried
+# only PYTHONUNBUFFERED=1 — no EnvironmentFile, no Environment=DSN, and no
+# comment telling you to `systemctl edit` it — while scripts/run_reconcile.py
+# requires TRADING_PLATFORM_DSN. As shipped it failed on every hourly fire, and
+# nothing said so, because it had no OnFailure either.
+
+[Unit]
+Description=Compare what the market-data sources said, and record every disagreement
+Documentation=file://@PREFIX@/docs/RUNBOOK.md
+After=trading-collector.service
+OnFailure=@ONFAILURE@
+
+[Service]
+Type=oneshot
+@USERLINES@WorkingDirectory=@PREFIX@
+EnvironmentFile=@ENVFILE@
+ExecStart=@PYTHON@ scripts/run_reconcile.py --hours 2
+Environment=PYTHONUNBUFFERED=1
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+@PROTECTHOME@

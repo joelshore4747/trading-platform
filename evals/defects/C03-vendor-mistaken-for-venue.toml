@@ -1,0 +1,30 @@
+id = "C03"
+title = "Stamping sources.venue with the vendor turns every error into basis"
+category = "data-integrity"
+severity = "high"
+provenance = "found by adversarial-reviewer attacking the W2 collector at cec3a29, 2026-09-04"
+expected_agent = "adversarial-reviewer"
+tell = """
+The reviewer must say that `sources.venue` is which TAPE a source describes, not
+which vendor delivers it, and that the collector stamped it with the vendor key
+("alpaca", "polygon"). The consequence is that every Alpaca-versus-Polygon
+disagreement is recorded with `same_venue = false` and therefore read as the
+basis — a market fact — when both claim to report the same consolidated tape and
+any difference between them is a bad print in one of them. That is precisely the
+"error into a shrug" the reconciler's own docstring says it exists to prevent,
+and it makes the multi-source workstream unable to find the thing it was built
+to find. The venue must be declared per source and never inferred from the
+vendor.
+"""
+expected_killers = ["tests/test_run_collector.py"]
+
+[[mutation]]
+file = "scripts/run_collector.py"
+find = '''
+        venue = spec.get("venue")
+        if not isinstance(venue, str) or not venue:
+'''
+replace = '''
+        venue = spec.get("venue") or spec.get("vendor")
+        if not isinstance(venue, str) or not venue:
+'''

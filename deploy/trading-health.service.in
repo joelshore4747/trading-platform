@@ -1,0 +1,20 @@
+# Rendered by deploy/install.sh — do not install this file directly.
+
+[Unit]
+Description=Check that the trading collector is actually collecting
+Documentation=file://@PREFIX@/docs/RUNBOOK.md
+# What turns a non-zero exit into something a person sees. The default target
+# is deploy/trading-alert@.service, which this repository now ships — it used
+# to be status-email@%n.service, a unit that exists in the Arch wiki and not
+# here, so the check ran, failed, and nobody found out. That is the state it
+# was written to replace. Point it at whatever you actually read with
+# --on-failure.
+OnFailure=@ONFAILURE@
+
+[Service]
+Type=oneshot
+@USERLINES@WorkingDirectory=@PREFIX@
+Environment=PYTHONUNBUFFERED=1
+# TRADING_PLATFORM_DSN lives here, outside the repository. 0600, owned by you.
+EnvironmentFile=@ENVFILE@
+ExecStart=@PYTHON@ scripts/check_health.py --quiet

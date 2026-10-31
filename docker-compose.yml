@@ -1,0 +1,34 @@
+# The store, for a machine that has Docker.
+#
+#   docker compose up -d postgres
+#   export TRADING_PLATFORM_DSN=postgresql://trading:trading@localhost:5439/trading_platform
+#
+# Port 5439 rather than 5432 so this cannot collide with a Postgres you already
+# depend on. The password here is a development credential and is meant to be
+# visible: it protects a database of public market prices on your own machine.
+# The production DSN comes from the environment and never appears in a file
+# inside this repository (core/credentials.py).
+#
+# Without Docker, scripts/dev_postgres.sh does the same job with the postgres
+# binaries directly.
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: trading_platform_store
+    environment:
+      POSTGRES_USER: trading
+      POSTGRES_PASSWORD: trading
+      POSTGRES_DB: trading_platform
+    ports:
+      - "5439:5432"
+    volumes:
+      - store_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trading -d trading_platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  store_data:

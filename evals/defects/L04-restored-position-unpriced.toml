@@ -1,0 +1,29 @@
+id = "L04"
+title = "A restored position is invisible to the risk layer until its symbol prints"
+category = "risk"
+severity = "critical"
+provenance = "found by adversarial-reviewer on the first paper supervisor, 2026-09-02 (finding F1); fixed in 40ad61f by seeding the engine's prices from the portfolio's marks"
+expected_agent = "risk-auditor"
+tell = """
+The reviewer must identify that Backtester.run starts its price dict empty
+even when handed a seeded portfolio, so `portfolio.equity(prices)` and the
+gross-exposure sum used by every risk check omit every restored position
+until that symbol prints a bar. The consequence must be stated: after a
+restart, an account whose short had lost most of its equity reads as fully
+solvent with zero gross exposure, and a buy far past every cap passes with
+no rejection.
+"""
+expected_killers = ["tests/test_live_supervisor.py"]
+
+[[mutation]]
+file = "src/trading_platform/engine/backtester.py"
+find = '''
+        prices: dict[str, Decimal] = {
+            symbol: price
+            for symbol in portfolio.positions
+            if (price := portfolio.last_price(symbol)) is not None
+        }
+'''
+replace = '''
+        prices: dict[str, Decimal] = {}
+'''

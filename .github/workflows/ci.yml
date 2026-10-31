@@ -1,0 +1,137 @@
+# CI: guard the branch, not just the session.
+#
+# A Stop hook refuses to end a session while the lookahead guards are failing,
+# but it only protects sessions where it actually runs — it needs a built .venv,
+# and it can be bypassed. Nothing stopped a red lookahead guard reaching origin.
+# This does.
+#
+# Every check here is one a human is told to run in CLAUDE.md, in the same
+# order, so a CI failure is always reproducible with a command from that file.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    # The store suite used to skip in CI — 111 tests, the whole Postgres layer,
+    # green by absence on every push. tests/test_store_guard.py's docstring
+    # already claimed "CI and scripts/dev_postgres.sh env both do"; only the
+    # second half was true. These two variables make it true.
+    #
+    # STORE_TESTS_REQUIRED turns a missing driver, a missing DSN or an
+    # unreachable database into a failure rather than a skip, which is what
+    # stops a run that quietly lost its database from reporting green.
+    env:
+      TRADING_PLATFORM_TEST_DSN: postgresql://trading:trading@localhost:5432/trading_platform
+      TRADING_PLATFORM_STORE_TESTS_REQUIRED: "1"
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: trading
+          POSTGRES_PASSWORD: trading
+          POSTGRES_DB: trading_platform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U trading -d trading_platform"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install
+        run: |
+          uv venv
+          uv pip install -e ".[dev,store]"
+
+      # First and separately, so a failure here is unmissable in the log. These
+      # guard the one-bar delay between signal and fill — the property that
+      # makes every other number in this repository mean anything.
+      - name: Lookahead guards
+        run: .venv/bin/python -m pytest tests/test_lookahead.py -v
+
+      - name: Tests
+        run: .venv/bin/python -m pytest -q -m "not slow"
+
+      # The false-discovery gate, and the reason it is separate: it runs the
+      # whole evaluation pipeline a hundred times over data with no
+      # predictability in it and counts how often the pipeline claims an edge.
+      # Slower than everything else here put together, and the one check that
+      # says whether any other number this project reports means anything.
+      #
+      # Deterministic despite the statistics — the seeds are fixed and every
+      # stage downstream is too, so it is a characterisation number rather than
+      # a random variable. It cannot flake; it can only go red because
+      # something changed the pipeline's discrimination.
+      - name: False-discovery gate
+        run: .venv/bin/python -m pytest -q -m slow
+
+      # Level 1 of the harness. Reintroduces defects this repository has already
+      # had, into throwaway copies of the tree, and checks that the suite still
+      # objects. A mutant that survives is a guard that cannot fail — the most
+      # repeated defect in this project's history, and the only class of defect
+      # that a green suite actively hides rather than merely missing.
+      #
+      # Free, deterministic, and it runs its own control first: an unmutated
+      # tree must pass before any result below it is believed. The agent eval
+      # (level 2) is deliberately NOT here — it costs money per run.
+      - name: Harness — mutation eval
+        run: .venv/bin/python scripts/run_mutation_eval.py --jobs 2
+
+      - name: Types
+        run: .venv/bin/mypy
+
+      - name: Lint
+        run: .venv/bin/ruff check .
+
+      - name: Format
+        run: .venv/bin/ruff format --check .
+
+      # The prompt guard's corpus, enforced on the branch rather than only
+      # locally. Precision is the gate: a guard that cries wolf gets switched
+      # off, and a switched-off guard protects nothing.
+      - name: Prompt guard corpus
+        run: .venv/bin/python scripts/prompt_guard.py --self-test
+
+      # The examples are documentation that can rot. Running them means a
+      # broken public API is caught here rather than by the next reader.
+      - name: Examples still run
+        run: |
+          .venv/bin/python examples/run_backtest.py > /dev/null
+          .venv/bin/python examples/run_walk_forward.py > /dev/null
+          .venv/bin/python examples/run_tearsheet.py > /dev/null
+
+      # Market data and rendered tearsheets are regenerable and gitignored. A
+      # commit containing either means the ignore rules have drifted.
+      - name: No committed artefacts or credentials
+        run: |
+          if git ls-files | grep -E '\.(parquet|feather|env)$|^runs/|^data/cache/'; then
+            echo "::error::Regenerable artefacts or credentials are tracked in git."
+            exit 1
+          fi

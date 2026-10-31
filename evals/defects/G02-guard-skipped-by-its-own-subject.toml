@@ -1,0 +1,27 @@
+id = "G02"
+title = "The guard against a silently-skipped suite is skipped by the mark it polices"
+category = "guard"
+severity = "high"
+provenance = "found by adversarial-reviewer attacking the W1 store at c4c81af, 2026-09-03"
+expected_agent = "guard-auditor"
+tell = """
+The auditor must say that `test_the_store_tests_are_not_quietly_disabled` sat
+under the same module-level `pytestmark` whose skip it existed to detect, so it
+was skipped in precisely the two cases it was written to catch (DSN unset, DSN
+unreachable) and, in the third, asserted the predicate the mark had already
+required — trivially green. The consequence is that the protection cited in ADR
+0010 and in the commit message did not exist: a CI run that lost its database
+reports green over twenty-odd skips. The fix is a guard in a file with no
+module-level skip, which reads the mark's computed condition rather than
+recomputing it.
+"""
+expected_killers = ["tests/test_store_guard.py"]
+
+[[mutation]]
+file = "tests/test_store.py"
+find = '''
+    _dsn() is None or not _reachable(_dsn() or ""),
+'''
+replace = '''
+    True,
+'''

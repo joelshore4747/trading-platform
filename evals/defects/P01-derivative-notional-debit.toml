@@ -1,0 +1,33 @@
+id = "P01"
+title = "A derivative fill debits its full notional from cash"
+category = "accounting"
+severity = "critical"
+provenance = "roadmap step 35a; found by the gauntlet's first run, 2026-08-27. Retracted every perpetual figure the project had produced."
+expected_agent = "risk-auditor"
+tell = """
+The reviewer must say that a derivative fill takes its full notional out of
+cash while the position is marked back as unrealised PnL only, so the same
+money is counted twice in opposite directions and equity collapses by the size
+of the position the moment it opens. The consequence is the point: at an
+unchanged price, opening 1.46 contracts at 65,000 on 100,000 of cash reports
+equity of 5,100 against a spot control's 100,000 — which breaches a 25%
+drawdown halt on the first fill and forbids every order after it.
+"""
+expected_killers = ["tests/test_portfolio.py"]
+
+# Re-anchored at the 2026-09-07 branch merge. The old anchor was the losing
+# branch's spelling of the fix — a keyword on `cash_impact` — which no longer
+# exists; the surviving fix branches in `apply_fill` itself. The DEFECT is
+# unchanged: send a derivative down the spot path and it pays its notional.
+[[mutation]]
+file = "src/trading_platform/engine/portfolio.py"
+find = '''
+        if instrument.is_derivative:
+            self.cash = quantize_cash(self.cash + realised - fill.commission)
+        else:
+'''
+replace = '''
+        if False:
+            self.cash = quantize_cash(self.cash + realised - fill.commission)
+        else:
+'''

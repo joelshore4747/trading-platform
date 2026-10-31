@@ -1,0 +1,26 @@
+id = "C02"
+title = "A vendor redirect hands the API key to another origin"
+category = "guard"
+severity = "critical"
+provenance = "found by adversarial-reviewer attacking the W2 collector at cec3a29, 2026-09-04; demonstrated with two local servers"
+expected_agent = "adversarial-reviewer"
+tell = """
+The reviewer must say that `urllib`'s default `HTTPRedirectHandler` forwards
+every header except `content-*` across a 30x, `Authorization` included, so a
+vendor answering `302 https://elsewhere/` is handed the API key. The consequence
+is a credential leak from a transport that is otherwise careful — the key is
+deliberately kept out of the query string for exactly this class of reason, and
+`live/polygon.py` already refuses a cross-origin `next_url`, but that guard sits
+above the transport and a redirect goes around it. The fix belongs at the layer
+the key passes through: an opener that refuses a redirect leaving the origin.
+"""
+expected_killers = ["tests/test_alpaca.py"]
+
+[[mutation]]
+file = "src/trading_platform/live/alpaca.py"
+find = '''
+    opener = urllib.request.build_opener(SameOriginRedirects)
+'''
+replace = '''
+    opener = urllib.request.build_opener()
+'''

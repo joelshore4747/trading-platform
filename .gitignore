@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Secrets — never commit credentials of any kind
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+
+# Market data (large; regenerate or re-download instead of committing)
+data/cache/
+data/raw/
+data/vendor/
+*.parquet
+*.feather
+!data/samples/*.csv
+
+# Backtest artifacts
+runs/
+results/
+*.log
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Claude Code local overrides
+.claude/settings.local.json
+
+# Agent-eval reports: regenerable, and each run costs money to
+# reproduce, which is a reason to keep them locally and not to commit them.
+.harness-reports/
+.harness-reports-g01/
+
+# Local Postgres data directory (scripts/dev_postgres.sh). Throwaway by design.
+pgdata/
+.pgdata/

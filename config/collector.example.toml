@@ -1,0 +1,75 @@
+# An example collector configuration. Copy it, edit it, point the systemd unit
+# at your copy. See docs/RUNBOOK.md.
+#
+# Credentials are NOT here and must never be. They are read from the
+# environment: APCA_API_KEY_ID / APCA_API_SECRET_KEY for Alpaca,
+# POLYGON_API_KEY for Polygon. Use read-only market-data scopes.
+#
+# Three words that are easy to confuse, and the collector refuses the config if
+# any of them is wrong:
+#
+#   market      the STORE's market key. One of: spot, um, cm, equity, etf,
+#               option. US equities are "equity".
+#   vendor      which client fetches the data: "alpaca" or "polygon".
+#   venue       which TAPE the data describes: "iex", "sip", "nasdaq",
+#               "binance". This is the one that decides whether a disagreement
+#               between two sources is an ERROR (same venue: the prices should
+#               have been identical, so one is a bad print) or the BASIS
+#               (different venues: they describe different markets and are
+#               expected to differ). Getting it wrong turns every error into a
+#               shrug, so it is required and never inferred from the vendor.
+
+market = "equity"
+interval = "1m"
+journal_root = "data/journal"
+
+# Two vendors, both reporting the consolidated US tape, so they share a venue
+# and any difference between them is an error worth looking at.
+#
+# NOTE on `feed`: Alpaca's "iex" is the IEX tape alone, NOT the consolidated
+# market — perhaps 2-3% of volume. Comparing IEX against Polygon's consolidated
+# feed compares two different things, and the venue below would be a lie. If you
+# are on the free tier, set venue = "iex" here and expect the disagreements to
+# be recorded as basis, which is what they are.
+
+[[source]]
+name = "alpaca-sip"
+vendor = "alpaca"
+venue = "sip"           # the consolidated tape. Use "iex" on the free tier.
+asset_class = "stocks"  # Alpaca's own path segment, not the store's market
+feed = "sip"
+symbols = ["AAPL", "MSFT", "NVDA", "SPY"]
+poll_every_s = 15
+lookback_min = 120      # how far back the first poll reaches after a restart
+
+[[source]]
+name = "polygon"
+vendor = "polygon"
+venue = "sip"           # Polygon aggregates are consolidated
+symbols = ["AAPL", "MSFT", "NVDA", "SPY"]
+poll_every_s = 15
+# replicas = 2          # two independent connections to ONE vendor, recorded as
+                        # separate sources. Catches the vendor contradicting
+                        # itself; costs double the rate limit for little else.
+                        # Default 1. Raise it deliberately.
+
+# A crypto source. Uncomment with `market = "spot"` above, not "equity": one
+# collector configuration has one store market, so crypto and equities need
+# separate configs and separate runs.
+#
+# BTC-USD IS NOT BTCUSDT. Coinbase quotes real dollars; Binance quotes Tether,
+# and the gap between them is the peg — which this repository misread once
+# already (harness/KNOWN_FAILURES.md, 2026-08-24: a depeg moved measured
+# volatility from 20% to 55% while the return was unchanged). The product id is
+# stored verbatim so the reconciler never compares the two: they are different
+# instruments, and a difference between them is not a bad print.
+#
+# For a genuine same-venue check, pair this with another USD venue rather than
+# with Binance.
+#
+# [[source]]
+# name = "coinbase"
+# vendor = "coinbase"
+# venue = "coinbase"      # an exchange is its own tape
+# symbols = ["BTC-USD", "ETH-USD"]
+# poll_every_s = 30       # no key, so the limit is per-IP; be polite

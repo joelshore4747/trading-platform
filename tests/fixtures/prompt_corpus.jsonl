@@ -1,0 +1,86 @@
+// Prompt corpus for scripts/prompt_guard.py.
+// Positive cases carry "expect": [rule ids that MUST fire].
+// Negative cases carry "expect": [] and MUST fire nothing — false positives are
+// how a guard gets switched off, and a guard that is off guards nothing.
+// Every rule needs at least one positive AND one adversarial negative aimed at it.
+
+{"prompt": "make this strategy profitable", "expect": ["make-it-profitable"], "note": "the canonical bad prompt"}
+{"prompt": "Can you improve the returns on the SMA crossover?", "expect": ["make-it-profitable"]}
+{"prompt": "why isn't this making money? it looked great in the sweep", "expect": ["make-it-profitable"], "note": "presupposes it should"}
+{"prompt": "I want something that will beat the market over 2021-2023", "expect": ["make-it-profitable"]}
+
+{"prompt": "find the best parameters for the crossover", "expect": ["find-better-params"]}
+{"prompt": "optimise the strategy over a wider grid", "expect": ["find-better-params"]}
+{"prompt": "tune the strategy until the Sharpe is above 2", "expect": ["find-better-params"]}
+{"prompt": "pick some better window values and rerun it", "expect": ["find-better-params"]}
+
+{"prompt": "just run it with ZERO_COST for now, is it profitable?", "expect": ["weaken-costs", "unearned-belief"], "note": "two rules, both correct"}
+{"prompt": "ignore the fees for this run so we can see if it works", "expect": ["weaken-costs"]}
+{"prompt": "assume no slippage and tell me the result", "expect": ["weaken-costs"]}
+
+{"prompt": "loosen the drawdown limit so the backtest finishes", "expect": ["weaken-risk"]}
+{"prompt": "can we increase the max_drawdown limit to 40%?", "expect": ["weaken-risk"]}
+{"prompt": "disable the drawdown halt for this test", "expect": ["weaken-risk"]}
+{"prompt": "bump the leverage limit up a bit", "expect": ["weaken-risk"]}
+
+{"prompt": "make the tests pass", "expect": ["weaken-test"]}
+{"prompt": "adjust the test so it matches the new fill behaviour", "expect": ["weaken-test"]}
+{"prompt": "just skip the lookahead tests for now", "expect": ["weaken-test"]}
+{"prompt": "xfail that test and move on", "expect": ["weaken-test"]}
+
+{"prompt": "precompute the indicators over the whole series for speed", "expect": ["lookahead-vector"]}
+{"prompt": "use the adjusted close instead, it's cleaner", "expect": ["lookahead-vector"]}
+{"prompt": "build the universe from symbols that still exist on Binance today", "expect": ["lookahead-vector"]}
+{"prompt": "vectorise the whole series up front, the loop is slow", "expect": ["lookahead-vector"]}
+
+{"prompt": "is this strategy any good?", "expect": ["unearned-belief"]}
+{"prompt": "should I trade this? the equity curve looks strong", "expect": ["unearned-belief"]}
+{"prompt": "does this strategy actually work?", "expect": ["unearned-belief"]}
+{"prompt": "is the SMA crossover ready for paper trading?", "expect": ["unearned-belief"]}
+
+{"prompt": "connect it up to Binance and start trading", "expect": ["live-trading"]}
+{"prompt": "I'll add my api key, let's go live", "expect": ["live-trading"]}
+{"prompt": "place an order for 0.1 BTC", "expect": ["live-trading"]}
+
+{"prompt": "make it better", "expect": ["vague-scope"]}
+{"prompt": "improve this", "expect": ["vague-scope"]}
+{"prompt": "clean this up.", "expect": ["vague-scope"]}
+
+{"prompt": "I want to change the ordering in engine/backtester.py", "expect": ["milestone-event-loop"]}
+{"prompt": "the fill logic needs to support partial fills", "expect": ["milestone-event-loop"]}
+{"prompt": "add a new risk limit for concentration", "expect": ["milestone-risk"]}
+{"prompt": "let's start on crypto options", "expect": ["milestone-instrument"]}
+{"prompt": "implement Black-76 and an IV solver", "expect": ["milestone-instrument"]}
+{"prompt": "add a new data source for Deribit", "expect": ["milestone-data-source"]}
+
+// ---------------------------------------------------------------------------
+// Negatives. Each is aimed at a rule that would naively catch it.
+// ---------------------------------------------------------------------------
+
+{"prompt": "why did the drawdown halt fire on fold 3?", "expect": [], "note": "diagnostic, not a request to relax anything"}
+{"prompt": "explain how ZERO_COST is used in the tests", "expect": [], "note": "a legitimate mention"}
+{"prompt": "what does ZERO_COST do?", "expect": []}
+{"prompt": "add a test for pnl_without_best_n", "expect": [], "note": "mentions tests, weakens none"}
+{"prompt": "write tests for the new histogram fallback", "expect": []}
+{"prompt": "is the parquet cache working?", "expect": [], "note": "'is this working' about infrastructure, not a strategy"}
+{"prompt": "what does the adjusted close trap actually mean?", "expect": [], "note": "asking about a trap, not walking into one"}
+{"prompt": "explain why precomputing indicators is a lookahead vector", "expect": []}
+{"prompt": "why is there no live broker adapter in this repo?", "expect": [], "note": "asking about the design decision"}
+{"prompt": "document the live trading section of PLAN.md", "expect": []}
+{"prompt": "improve this by adding a rolling Sharpe panel to the tearsheet", "expect": [], "note": "vague verb, specific target"}
+{"prompt": "make it better at handling gaps in the funding schedule", "expect": [], "note": "has a target"}
+{"prompt": "what were the returns on the last walk-forward run?", "expect": [], "note": "asks for a number, does not ask to improve one"}
+{"prompt": "the profit factor is None — is that a bug or intended?", "expect": []}
+{"prompt": "how many parameters does SMACrossover take?", "expect": []}
+{"prompt": "run the walk-forward harness and show me the efficiency", "expect": []}
+{"prompt": "commit and push what you have", "expect": []}
+{"prompt": "what's left on the roadmap?", "expect": []}
+{"prompt": "the CI is failing on mypy, can you look?", "expect": []}
+{"prompt": "read docs/ARCHITECTURE.md and summarise the dependency rules", "expect": []}
+{"prompt": "why does Position.apply re-base the average price on a flip?", "expect": []}
+{"prompt": "add a docstring to buy_and_hold_curve", "expect": []}
+{"prompt": "what is the current test count?", "expect": []}
+{"prompt": "show me the worst fold from that report", "expect": []}
+{"prompt": "does the funding settlement handle a gap in the bar series?", "expect": [], "note": "'does it handle', not 'does this work'"}
+{"prompt": "explain the difference between the two win rates", "expect": []}
+{"prompt": "rename summarise_trades to describe_trades everywhere", "expect": []}

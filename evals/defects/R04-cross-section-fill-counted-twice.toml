@@ -1,0 +1,62 @@
+id = "R04"
+title = "Cross-section fills counted twice by the risk layer's pending deltas"
+category = "risk"
+severity = "critical"
+provenance = "found by risk-auditor on the 9b fix, 2026-09-02; consequence re-stated at the 2026-09-07 merge after the halt route was closed by construction; first fixed in 8fea148 with a blanket release the gauntlet then showed was itself a defect (2026-09-03); fixed for good with per-order release on fill"
+expected_agent = "risk-auditor"
+
+# Declared a survivor at the 2026-09-07 branch merge, on evidence, not on
+# convenience. The mutation no longer reintroduces the defect: the merged
+# worst-subset model takes the worst case over every SUBSET of unfilled orders,
+# which always includes the empty one, so a stale pending delta can never make
+# an opening order look reducing. Verified directly on the mutant rather than
+# argued — a halted account that flattens in the cross-section hook and tries to
+# re-enter is refused, reason `halted`.
+#
+# The entry is kept, not deleted, for two reasons. The defect was real and the
+# record of it stays. And the immunity is a property of the CURRENT model: if
+# the worst-subset framing is ever simplified back to a single netted base — the
+# thing the other branch had, and the thing that is tempting because it is
+# easier to read — this mutation becomes live again, and this file is what says
+# so.
+#
+# What `release_filled` still does is prevent a false REJECTION from
+# double-counted gross exposure. Measured on the mutant at the unit level: a
+# book at 0.5x buying to 1.0x against a 2x cap is refused at a fictional 1.5x.
+# No test covers it, and a test was attempted and withdrawn rather than shipped
+# green: pending deltas clear at every instant, so the double count is only
+# reachable inside a single instant, and the engine paths that fill within an
+# instant could not be made to express it. Filed as T-9515493e rather than
+# papered over with a test that passes whether or not the code is there.
+known_survivor = true
+tell = """
+The reviewer must identify that a filled order's pending delta is never
+released, so the order is counted twice against the caps: once in the position
+the engine now reports, once in `_pending_delta` / `_pending_gross`.
+
+**The consequence changed at the 2026-09-07 branch merge and the entry is
+re-stated rather than retired.** Originally this was a HOLE: the stale delta
+made a phantom short, and a halted account that flattened in the cross-section
+hook could "reduce" into a full re-entry with zero rejections. The merged
+worst-subset model prevents that by construction — the worst case always
+includes the empty subset, so no stale delta can make an opening order look
+reducing — and that was verified directly, not assumed: under the mutation, the
+halted re-entry is refused with reason `halted`.
+
+What remains is the mirror failure, and it is the one to report now: double
+counting refuses trades that are INSIDE the limit. Measured on the mutant, a
+book at 0.5x buying to 1.0x against a 2x cap is rejected at a fictional 1.5x.
+A false rejection is not unsafe, but an unmeasured one is how a limit quietly
+stops meaning what it says — and this survived the whole suite until a test was
+written for it.
+"""
+expected_killers = ["tests/test_cross_section_risk.py"]
+
+[[mutation]]
+file = "src/trading_platform/engine/backtester.py"
+find = '''
+                risk.release_filled(fill)
+'''
+replace = '''
+                pass  # the filled order's pending delta left in place
+'''

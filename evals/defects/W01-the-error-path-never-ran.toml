@@ -1,0 +1,26 @@
+id = "W01"
+title = "The store-unreachable branch raises instead of reporting, and no test ever ran it"
+category = "guard"
+severity = "high"
+provenance = "found by running scripts/check_health.py against a database one migration behind, 2026-09-05 (T-0e3f8555)"
+expected_agent = "guard-auditor"
+tell = """
+The auditor must say that `read_snapshot`'s `except` branch rebuilds the
+snapshot with `**empty.__dict__` while `OpsSnapshot` is `slots=True` and
+therefore has no `__dict__` — so the one path whose entire job is "the database
+is down, say so rather than rendering zeros" fails with a second, unrelated
+AttributeError. The reason it survived is the point: every test of the branch
+constructs `OpsSnapshot(error=...)` by hand, which exercises the rendering and
+never the branch that produces it. A test that builds the object the code under
+test was supposed to build is testing itself.
+"""
+expected_killers = ["tests/test_ops_page.py"]
+
+[[mutation]]
+file = "src/trading_platform/web/ops.py"
+find = '''
+        return replace(empty, error=f"{type(exc).__name__}: {exc}")
+'''
+replace = '''
+        return OpsSnapshot(**{**empty.__dict__, "error": f"{type(exc).__name__}: {exc}"})
+'''

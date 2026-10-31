@@ -1,0 +1,25 @@
+id = "E-002"
+name = "SMACrossover on pure chop"
+hypothesis = "On a series with no structure the harness must fail the strategy; disproved if it passes"
+motivation = "the harness needs a control that must fire"
+dataset = "synthetic, old generator, pure chop"
+dataset_version = "UNKNOWN"
+strategy = "SMACrossover"
+strategy_version = "pre-calibration"
+commit = "UNKNOWN"
+date_range = "2026-08 synthetic"
+method = "rolling walk-forward"
+result = "efficiency 1.24 — a FALSE PASS on structureless data; led to the multi-verdict design"
+confidence = "unknown"
+limitations = "single-verdict harness could pass noise"
+status = "RETIRED"
+next_step = "examples/run_walk_forward.py reproduces the control"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+
+[metrics]
+efficiency = "1.24"

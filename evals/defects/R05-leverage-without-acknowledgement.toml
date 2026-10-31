@@ -1,0 +1,32 @@
+id = "R05"
+title = "A paper session can hold a leveraged instrument nobody acknowledged"
+category = "risk"
+severity = "high"
+provenance = "gap closed by workstream 3, 2026-09-04; ADR 0011"
+expected_agent = "risk-auditor"
+tell = """
+The auditor must say that `RiskManager` bounds the SIZE of a leveraged position
+through the notional, margin and gross-leverage caps but never asks whether the
+account was permitted to take leverage at all, so registering a 10x perpetual on
+a paper account is one keyword argument and nothing records that anyone
+understood what 10x means. The consequence is that the one number nobody works
+out during a drawdown — a fully deployed account at 10x loses twice its equity on
+a 20% adverse move and owes the difference — is never stated before the fact. The
+control is a stored `LeverageAcknowledgement` per account and symbol, consulted
+on the order path beside `halted` and `insolvent`, exempt for reducing orders so
+an account is never trapped in a position it cannot close.
+"""
+expected_killers = ["tests/test_leverage.py"]
+
+[[mutation]]
+file = "src/trading_platform/risk/limits.py"
+find = '''
+        if self.leverage_gate is not None and not reduces_exposure:
+            refusal = self.leverage_gate.refusal(instrument)
+            if refusal is not None:
+                self._reject(timestamp, order.symbol, "leverage_unacknowledged", refusal)
+                return False
+'''
+replace = '''
+        pass
+'''

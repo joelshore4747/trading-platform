@@ -1,0 +1,33 @@
+id = "R01"
+title = "Exposure-reducing test measured against the raw position, not pending deltas"
+category = "risk"
+severity = "critical"
+provenance = "docs/ROADMAP.md step 9, defect R1; a halted account long 100 walked to short 50"
+expected_agent = "risk-auditor"
+tell = """
+The reviewer must say that because fills land on the next bar, every order in a
+batch is measured against the same unchanged position, so each sell in a
+sequence looks individually risk-reducing. The consequence must be stated: a
+halted account can be walked through flat into an opposite position using
+orders that each pass the halt check, making the most restrictive state in the
+system the least restrictive.
+"""
+expected_killers = ["tests/test_risk_composition.py"]
+
+# Re-anchored at the 2026-09-07 branch merge: the predicate moved from
+# `_reduces_exposure(order, effective_quantity)` to a pair of
+# `_reduces_exposure_between` calls over the worst-case bases. The defect is
+# unchanged — measure the exemption against the RAW position and every sell in
+# a batch looks reducing, because none has filled yet.
+[[mutation]]
+file = "src/trading_platform/risk/limits.py"
+find = '''
+        reduces_exposure = self._reduces_exposure_between(
+            high_base, high_base + delta
+        ) and self._reduces_exposure_between(low_base, low_base + delta)
+'''
+replace = '''
+        reduces_exposure = self._reduces_exposure_between(
+            current_quantity, current_quantity + delta
+        )
+'''

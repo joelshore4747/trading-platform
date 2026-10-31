@@ -1,0 +1,19 @@
+# Rendered by deploy/install.sh — do not install this file directly.
+#
+# The OnFailure target for every unit here. %i is the unit that failed.
+#
+# It exists because the alternative was a dangling reference: the health check
+# pointed OnFailure at status-email@%n.service, which this repository does not
+# contain, so a failing check produced nothing at all. A default that logs at
+# error level is not a good alerting system, but it is one you can grep for and
+# it is honest about having fired. Set TRADING_PLATFORM_ALERT_WEBHOOK in the
+# environment file to also POST it somewhere you read.
+
+[Unit]
+Description=Announce that %i failed
+
+[Service]
+Type=oneshot
+@USERLINES@WorkingDirectory=@PREFIX@
+EnvironmentFile=-@ENVFILE@
+ExecStart=@PREFIX@/deploy/alert.sh %i

@@ -1,0 +1,23 @@
+id = "R02"
+title = "Leverage checks skipped at exactly zero equity"
+category = "risk"
+severity = "high"
+provenance = "docs/ROADMAP.md step 9, defect R4; a policy hole in the one state where it matters most"
+expected_agent = "risk-auditor"
+tell = """
+The reviewer must identify the boundary: at equity exactly zero the insolvency
+refusal no longer fires, so risk-increasing orders are permitted in the one
+account state that cannot tolerate them. An off-by-one on a comparison operator
+that is reachable, not theoretical — equity-relative caps collapse to zero
+there, so every cap it would otherwise hit is also zero.
+"""
+expected_killers = ["tests/test_risk.py", "tests/test_risk_composition.py"]
+
+[[mutation]]
+file = "src/trading_platform/risk/limits.py"
+find = '''
+        if equity <= 0 and not reduces_exposure:
+'''
+replace = '''
+        if equity < 0 and not reduces_exposure:
+'''

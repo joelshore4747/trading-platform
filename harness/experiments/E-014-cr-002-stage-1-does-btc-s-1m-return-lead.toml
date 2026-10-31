@@ -1,0 +1,33 @@
+id = "E-014"
+name = "CR-002 stage 1: does BTC's 1m return lead the alt perpetual cross-section"
+hypothesis = "BTCUSDT's one-minute return leads the 38 alt perpetuals' next-minute returns. S = cross-sectional mean Spearman(r_BTC(t), r_alt(t+1)) on the 39-symbol intersection panel, within contiguous segments only. DISPROVED if any of: (1) S below the 99th percentile of 1,000 within-segment circular shifts of the BTC column (offset >= 60 rows); (2) lag -1 (alts leading BTC) is not inside its own null band, or lag 0 does not dwarf lag +1; (3) mean signed next-minute alt return conditional on |r_BTC(t)| in its top decile does not exceed one round trip of the default CostModel (26 bp)."
+motivation = "harness/CREATIVE_RESEARCH.md CR-002: liquidity topology; price discovery in the deepest book. Cleared to run by E-013 (gaps are not activity-conditioned)."
+dataset = "Binance USD-M perpetual archive, 39 screened symbols, 1m, intersection panel, 2026-07-20 to 2026-08-21"
+dataset_version = "historical.zip sha256 65f25750c402"
+strategy = "none (stage 1 is a statistic; stage 2 would be a LeaderFollower strategy)"
+strategy_version = "-"
+commit = "b66c3d0"
+date_range = "2026-07-20 to 2026-08-21"
+method = "scripts/measure_leadlag.py: Spearman via standardised ranks, lags -1/0/+1, null by within-segment circular shift of BTC (1,000 draws for lag +1, 200 for the diagnostic lags), conditional-return-vs-cost line"
+result = """DISPROVED on (1) and (3); (2) passed (scripts/measure_leadlag.py, seed 0, 6.5 s, 39 symbols, 20,856 intersection rows, 19 segments). S(+1) = +0.0016, inside the null (2.5/97.5/99 = -0.0074/+0.0072/+0.0088; percentile 66.5; 1,000 draws). Lag 0 = +0.4309 - the contemporaneous common factor dwarfs everything - and lag -1 = -0.0020 sits inside its band, so what structure exists is symmetric factor co-movement, not propagation. Conditional on |r_BTC(t)| in its top decile (>= 6.4 bp) the mean signed next-minute alt return is +0.16 bp over 79,154 observations against a 26 bp round trip. Any BTC->alt lead at this venue is inside the one-minute bar; at 1m there is nothing to trade."""
+confidence = "high"
+limitations = "07-10 UTC weighted two to one; one venue, one month; tick-level lead of tens of seconds (INFERRED from a snippet, paper unread) would be inside a 1m bar"
+status = "REJECTED"
+next_step = "if (1)+(2) pass and (3) fails: real but untradeable at 1m, RETIRE; if (2) fails: retire the propagation story; only if all three survive: stage 2 /new-strategy LeaderFollower"
+created = "2026-09-03"
+trial_count = 1
+
+[parameters]
+lag_registered = "+1"
+draws = "1000"
+seed = "0"
+min_shift = "60"
+
+[metrics]
+S_lag_plus_1 = "+0.0016"
+null_p99_lag_plus_1 = "+0.0088"
+S_lag_0 = "+0.4309"
+S_lag_minus_1 = "-0.0020"
+conditional_return_bp = "+0.16"
+round_trip_bp = "26"
+runtime_s = "6.5"

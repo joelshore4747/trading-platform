@@ -1,0 +1,24 @@
+id = "D01"
+title = "Open-stamped vendor files are loaded without the close-stamp shift"
+category = "data-integrity"
+severity = "critical"
+provenance = "docs/ROADMAP.md step 25; the property that decided the whole vendor design"
+expected_agent = "lookahead-auditor"
+tell = """
+The reviewer must say that an open-stamped file loaded without the one-interval
+shift labels every bar with the start of its interval while the rest of the
+repository treats a stamp as a close — so every bar is one interval early and
+every signal is computed on a bar the strategy could not yet have seen. At
+1-minute frequency on the vendor archive this is a one-bar lookahead that
+produces a plausible backtest rather than an error.
+"""
+expected_killers = ["tests/test_vendor.py"]
+
+[[mutation]]
+file = "src/trading_platform/data/vendor.py"
+find = '''
+        shift = interval if stamp == "open" else timedelta(0)
+'''
+replace = '''
+        shift = timedelta(0)
+'''

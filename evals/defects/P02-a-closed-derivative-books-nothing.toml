@@ -1,0 +1,31 @@
+id = "P02"
+title = "Closing a derivative books no P&L at all — the gain and the loss both vanish"
+category = "accounting"
+severity = "critical"
+provenance = "found at the 2026-09-07 branch merge, by testing the two branches' rival fixes for P01 against each other rather than choosing by commit count"
+expected_agent = "risk-auditor"
+tell = """
+The reviewer must say that `Position.apply` computes realised P&L, that the
+derivative path discards the return value, and that `positions_value` carries a
+derivative at unrealised P&L only — so when the position closes, the unrealised
+goes to zero and the realised never reached cash. The gain does not go
+somewhere wrong; it stops existing. Measured: open a perp at 100, mark at 150
+and equity is a correct 100,050; close the winner and equity is 100,000 again.
+It is symmetric, which is why no equity curve looked obviously broken — losses
+vanish too, so a perp strategy reports flat whatever it did, and a backtest of
+one is a measurement of nothing.
+
+The reviewer should also note WHY this survived: it is invisible while a
+position is open, and the suite's derivative tests all asserted on open
+positions.
+"""
+expected_killers = ["tests/test_portfolio.py"]
+
+[[mutation]]
+file = "src/trading_platform/engine/portfolio.py"
+find = '''
+            self.cash = quantize_cash(self.cash + realised - fill.commission)
+'''
+replace = '''
+            self.cash = quantize_cash(self.cash - fill.commission)
+'''

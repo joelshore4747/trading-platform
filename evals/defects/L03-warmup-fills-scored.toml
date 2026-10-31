@@ -1,0 +1,23 @@
+id = "L03"
+title = "Warm-up fills counted as out-of-sample fills"
+category = "evaluation"
+severity = "high"
+provenance = "commit b84c06c 'Stop counting warm-up fills as out-of-sample ones'; measured 2.17x overstatement"
+expected_agent = "overfitting-auditor"
+tell = """
+The reviewer must say that scored_fills no longer excludes fills that happened
+in the warm-up region, so the fill count reported per fold includes trades from
+before the scored window. The consequence is the point: median_fills_per_fold
+is the gate deciding whether a fold has enough trades to mean anything, and it
+would now read an inflated number and pass folds that should fail.
+"""
+expected_killers = ["tests/test_walkforward.py", "tests/test_windows.py"]
+
+[[mutation]]
+file = "src/trading_platform/analytics/windows.py"
+find = '''
+        return [f for f in fills if f.timestamp >= self.start]
+'''
+replace = '''
+        return list(fills)
+'''

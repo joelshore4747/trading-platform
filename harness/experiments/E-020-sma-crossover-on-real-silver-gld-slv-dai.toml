@@ -1,0 +1,34 @@
+id = "E-020"
+name = "sma-crossover-on-real-silver-gld-slv-daily-slv"
+hypothesis = "A moving-average crossover on SLV daily bars produces out-of-sample risk-adjusted returns distinguishable from doing nothing, after costs."
+motivation = "The same test as E-018 on SPY, moved to a silver ETF, to find out whether the harness's rejection was about the strategy, the sample design, or the instrument. Run as a deliberate triple so the answer is comparable rather than anecdotal."
+dataset = "Polygon aggregates, SLV daily, adjusted=false, via scripts/fetch_polygon.py"
+dataset_version = "polygon-free-2024-09-10..2026-09-04-499bars"
+strategy = "SMACrossover"
+strategy_version = "unchanged from E-018 and the crypto runs"
+commit = "209159d"
+date_range = "2024-09-10..2026-09-04"
+method = "Identical to E-018: rolling walk-forward, 8 folds, train 150 / test 40 / warmup 100, 9-cell grid, objective sharpe, periods_per_year=252, default CostModel, benchmark SLV buy-and-hold."
+result = "REJECTED, and the most informative of the three. Efficiency 0.89, mean out-of-sample Sharpe 1.66, 5/8 folds profitable -- but 4/8 folds HALTED out of sample. Once the drawdown halt latches, every later order is refused, so half the folds describe the RISK LAYER rather than the strategy: a fold forbidden to trade is not a fold that declined to. Also a median of zero out-of-sample fills, one fold whose annualisation is not meaningful, and buy-and-hold beaten in only 2/8 folds, the worst of the three instruments. Silver's volatility is what tripped the halt, which is the risk layer working rather than failing."
+confidence = "high"
+limitations = "BACKFILLED, written after the run, contrary to charter 42 and stated rather than hidden. SLV is an ETV holding the physical metal, so it tracks spot minus fees -- unlike USO, which holds futures and measures the roll rather than the commodity. Two years, one regime, silently truncated from a six-year request (T-594716a0). CROSS-INSTRUMENT MULTIPLICITY: this is the third instrument the same strategy has been run against today at 72 fits each, so 216 fits inform the set, and no deflation is applied to any of them -- the harness rejected all three before multiplicity mattered, which is why it did not need to."
+status = "REJECTED"
+next_step = "Do not tune. All three instruments failed for the same dominant reason -- a 40-bar test window on a slow-crossover rule generates almost no trades -- so the next step is a test design that can produce fills, or more data, not a different grid."
+created = "2026-09-08"
+trial_count = 72
+
+[parameters]
+
+[metrics]
+efficiency = 0.89
+mean_in_sample_sharpe = 1.86
+mean_out_of_sample_sharpe = 1.66
+profitable_folds = "5/8"
+halted_folds = "4/8"
+out_of_sample_fills_total = 6
+out_of_sample_fills_median_per_fold = 0
+grid_profitable_pct = 78
+neighbour_ratio_median = 0.81
+parameter_stability_pct = 86
+beat_buy_and_hold_folds = "2/8"
+

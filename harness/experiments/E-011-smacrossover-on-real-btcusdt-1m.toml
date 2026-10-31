@@ -1,0 +1,31 @@
+id = "E-011"
+name = "SMACrossover on real BTCUSDT 1m"
+hypothesis = "SMACrossover retains OOS efficiency on real BTCUSDT; disproved by negative in-sample Sharpe or failed verdicts"
+motivation = "first real-data run"
+dataset = "BTCUSDT 1m, 21,158 bars, 46% coverage"
+dataset_version = "archive 2026-08"
+strategy = "SMACrossover"
+strategy_version = "calibrated"
+commit = "UNKNOWN"
+date_range = "2026-08 (32 days, gapped)"
+method = "rolling walk-forward, 18 folds, 16 cells"
+result = "first run was fiction (35a derivative accounting); re-run: in-sample Sharpe −2.52, six verdicts failed"
+confidence = "unknown"
+limitations = "46% coverage biased to 07–10 UTC; one venue; one month"
+status = "REJECTED"
+next_step = "none for this strategy; the harness result stands"
+created = "2026-09-01"
+trial_count = 3
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+folds = "18"
+cells = "16"
+train = "3000"
+test = "1000"
+warmup = "1440"
+
+[metrics]
+in_sample_sharpe = "-2.52"
+verdicts_failed = "6"

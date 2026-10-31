@@ -1,0 +1,23 @@
+id = "A01"
+title = "The underwater panel renders drawdown as positive"
+category = "accounting"
+severity = "medium"
+provenance = "found by guard-auditor on an unmutated tree, first agent-eval run, 2026-08-27"
+expected_agent = "strategy-reviewer"
+tell = """
+The reviewer must say that the underwater panel now plots drawdown above zero
+rather than below it, so a chart whose entire purpose is to show how deep and
+how long an account was underwater shows the opposite sign. The consequence is
+that every depth collapses the y-scale to 0..0 and the axis renders positive
+ticks for an account that only ever lost from its peak.
+"""
+expected_killers = ["tests/test_tearsheet.py"]
+
+[[mutation]]
+file = "src/trading_platform/analytics/tearsheet.py"
+find = '''
+        points.append((_x(point.timestamp), -((peak - value) / peak) if peak else 0.0))
+'''
+replace = '''
+        points.append((_x(point.timestamp), ((peak - value) / peak) if peak else 0.0))
+'''

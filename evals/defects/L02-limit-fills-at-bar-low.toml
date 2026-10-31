@@ -1,0 +1,25 @@
+id = "L02"
+title = "Limit buys fill at the bar's low rather than the better of limit and open"
+category = "lookahead"
+severity = "high"
+provenance = "lookahead-auditor category 6, fill-price optimism"
+expected_agent = "lookahead-auditor"
+tell = """
+The reviewer must say that filling a buy at the bar's low assumes the order was
+placed at the single best price printed during the bar, which is only knowable
+after the bar completes. It is the textbook optimistic-fill leak and it
+silently improves every backtest that uses limit orders.
+"""
+
+[[mutation]]
+file = "src/trading_platform/engine/execution.py"
+find = '''
+            if bar.low <= limit:
+                # Fill at the better of the limit and the bar's open.
+                raw = min(limit, bar.open)
+'''
+replace = '''
+            if bar.low <= limit:
+                # Fill at the better of the limit and the bar's open.
+                raw = min(limit, bar.low)
+'''

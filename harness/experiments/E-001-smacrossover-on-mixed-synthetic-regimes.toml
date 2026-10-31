@@ -1,0 +1,27 @@
+id = "E-001"
+name = "SMACrossover on mixed synthetic regimes"
+hypothesis = "SMACrossover has an edge on mixed synthetic regimes; disproved if OOS efficiency falls below the buy-and-hold benchmark"
+motivation = "first walk-forward run of the harness"
+dataset = "synthetic, old generator (pre-calibration)"
+dataset_version = "UNKNOWN"
+strategy = "SMACrossover"
+strategy_version = "pre-calibration"
+commit = "UNKNOWN"
+date_range = "2026-08 synthetic"
+method = "rolling walk-forward, 16-cell grid"
+result = "efficiency 0.86 / anchored 1.86 — RETRACTED: the generator's TREND regime carries an embedded Sharpe of 6.36, so any long position looked good"
+confidence = "unknown"
+limitations = "result measured the generator, not the strategy"
+status = "RETIRED"
+next_step = "superseded by E-003"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+grid = "fast x slow, 16 cells"
+
+[metrics]
+efficiency = "0.86"
+anchored_efficiency = "1.86"

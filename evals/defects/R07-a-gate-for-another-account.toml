@@ -1,0 +1,26 @@
+id = "R07"
+title = "A session accepts a leverage gate belonging to a different account"
+category = "risk"
+severity = "high"
+provenance = "found by adversarial-reviewer attacking W3 at e93b7e6, 2026-09-04"
+expected_agent = "risk-auditor"
+tell = """
+The auditor must say that `SupervisorConfig` checks whether a leverage gate is
+PRESENT and never whether it belongs to this account, so a gate built for
+account a2 admits a2's acknowledgements on account a1 — a 10x perpetual filling
+with zero rejections. `LeverageGate.of` refuses to mix accounts and ADR 0011
+says an acknowledgement does not carry between them, so the rule exists and the
+one place that could enforce it did not. A copy-pasted gate is exactly the
+"leverage arriving because a keyword was wrong" that the presence check was
+written to prevent.
+"""
+expected_killers = ["tests/test_live_supervisor.py"]
+
+[[mutation]]
+file = "src/trading_platform/live/supervisor.py"
+find = '''
+        if self.leverage_gate is not None and self.leverage_gate.account != self.account:
+'''
+replace = '''
+        if False:
+'''

@@ -1,0 +1,26 @@
+id = "E-007"
+name = "Point-in-time universe grows correctly"
+hypothesis = "A point-in-time registry never shows a listing before it existed; disproved by any symbol visible before its listing date"
+motivation = "survivorship defence"
+dataset = "Coin Metrics, 38 assets"
+dataset_version = "2024 snapshot"
+strategy = "none (data layer)"
+strategy_version = "-"
+commit = "UNKNOWN"
+date_range = "2011–2024"
+method = "registry inspection"
+result = "1 asset in 2011 → 38 in 2024; MKR delisting exercised"
+confidence = "unknown"
+limitations = "one vendor's listing dates"
+status = "COMPLETED"
+next_step = "examples/run_universe.py"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+
+[metrics]
+assets_2011 = "1"
+assets_2024 = "38"

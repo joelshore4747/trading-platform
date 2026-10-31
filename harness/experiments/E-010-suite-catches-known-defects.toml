@@ -1,0 +1,26 @@
+id = "E-010"
+name = "Suite catches known defects"
+hypothesis = "The test suite kills every reintroduced corpus defect except the declared survivor; disproved by an undeclared survivor"
+motivation = "ADR 0006, level 1"
+dataset = "evals/ corpus, 11 mutants"
+dataset_version = "corpus 2026-09-01"
+strategy = "-"
+strategy_version = "-"
+commit = "UNKNOWN"
+date_range = "2026-09-01"
+method = "pytest per mutant tree"
+result = "10/11 killed; L02 hole found and closed; G01 declared survivor"
+confidence = "unknown"
+limitations = "corpus contains only defects already found"
+status = "COMPLETED"
+next_step = "runs in CI; extend the corpus with every new defect"
+created = "2026-09-01"
+trial_count = 1
+backfilled = true
+source = "harness/EXPERIMENT_INDEX.md"
+
+[parameters]
+mutants = "11"
+
+[metrics]
+killed = "10/11"

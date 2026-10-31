@@ -1,0 +1,28 @@
+id = "W02"
+title = "A wedged collector is indistinguishable from a working one"
+category = "data-integrity"
+severity = "medium"
+provenance = "found by adversarial-reviewer on the W2 collector at cec3a29, 2026-09-04 (T-f280e8f0)"
+expected_agent = "adversarial-reviewer"
+tell = """
+The reviewer must say that `CaptureStats.consecutive_errors` and `sink_failures`
+are only ever read at exit — `run_collector.py` prints them in its `finally` and
+returns them as an exit code — by a process designed to run for months, so in
+practice nothing reads them at all. It must also see the second half: while the
+capture runs, its `ingest_runs` row sits at `status = 'running'` with no
+indication of whether it is capturing a bar a minute or failing every poll, and
+`feed_health` cannot fill the gap because a process that died a minute ago still
+satisfies it from the bars it already wrote — for the whole silence threshold,
+which is exactly the window in which knowing would help.
+"""
+expected_killers = ["tests/test_ops_page.py", "tests/test_collect.py", "tests/test_store.py"]
+
+[[mutation]]
+file = "src/trading_platform/collect/capture.py"
+find = '''
+            self._beat()
+            self._wait(stop)
+'''
+replace = '''
+            self._wait(stop)
+'''

@@ -1,0 +1,26 @@
+id = "M01"
+title = "CAGR annualises a window far too short to annualise"
+category = "accounting"
+severity = "high"
+provenance = "found by examples/run_walk_forward_btc.py (roadmap step 35) on the real archive, 2026-08-27"
+expected_agent = "strategy-reviewer"
+tell = """
+The reviewer must say that removing the minimum-window check lets CAGR raise
+the period return to the power 1/years for arbitrarily small years, so a
+sub-daily window reports a growth rate that describes the compounding rather
+than the strategy. The concrete consequence is the point: over 1,000 one-minute
+bars the exponent is 526, a 2% gain reports roughly 3,300,000%, and a 4% gain
+raises OverflowError out of the walk-forward harness.
+"""
+expected_killers = ["tests/test_metrics.py"]
+
+[[mutation]]
+file = "src/trading_platform/analytics/metrics.py"
+find = '''
+    if years < MIN_ANNUALISABLE_YEARS:
+        return None
+'''
+replace = '''
+    if years <= 0:
+        return None
+'''
